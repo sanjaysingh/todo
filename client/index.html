@@ -293,11 +293,19 @@
                     <h2>Welcome! Please authenticate to continue</h2>
                     <div class="form-group">
                         <label for="username">Username:</label>
-                        <input type="text" id="username" placeholder="Enter your username" required>
+                        <input type="text" id="username" placeholder="Enter username (required for registration)" required>
+                        <small style="color: #6c757d; margin-top: 0.5rem; display: block;">
+                            For registration: Enter a username<br>
+                            For login: Leave blank for usernameless authentication
+                        </small>
                     </div>
                     <div>
                         <button id="register-btn" class="btn">Register with Passkey</button>
                         <button id="login-btn" class="btn btn-secondary">Login with Passkey</button>
+                    </div>
+                    <div style="margin-top: 1rem; padding: 1rem; background: #e8f4f8; border-radius: 10px; border-left: 4px solid #17a2b8;">
+                        <strong>🔐 Passkey Authentication</strong><br>
+                        <small>Click "Login with Passkey" to see all your saved passkeys for this site. No username needed!</small>
                     </div>
                 </div>
                 <div id="auth-error" class="error hidden"></div>
@@ -506,21 +514,20 @@
 
         async function login() {
             const username = usernameInput.value.trim();
-            if (!username) {
-                showError('auth-error', 'Please enter a username');
-                return;
-            }
+            
+            // Username is now optional for usernameless authentication
+            console.log('Starting authentication for user:', username || 'usernameless');
 
             loginBtn.dataset.originalText = loginBtn.textContent;
             setLoading(loginBtn, true);
 
             try {
-                // Step 1: Begin authentication
-                console.log('Starting authentication for username:', username);
+                // Step 1: Begin authentication (usernameless)
+                console.log('Starting usernameless authentication...');
                 const beginResponse = await fetch(`${AUTH_SERVICE_URL}/auth/login/begin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username })
+                    body: JSON.stringify({}) // No username required for usernameless auth
                 });
 
                 if (!beginResponse.ok) {
@@ -531,16 +538,9 @@
                 const options = await beginResponse.json();
                 console.log('Authentication options received:', options);
                 console.log('AllowCredentials details:', options.allowCredentials);
-                if (options.allowCredentials && options.allowCredentials.length > 0) {
-                    options.allowCredentials.forEach((cred, index) => {
-                        console.log(`Credential ${index}:`, {
-                            id: cred.id,
-                            idLength: cred.id ? cred.id.length : 0,
-                            type: cred.type,
-                            transports: cred.transports
-                        });
-                    });
-                }
+                
+                // For usernameless auth, allowCredentials should be empty
+                console.log('Usernameless auth - allowCredentials length:', options.allowCredentials.length);
 
                 // Step 2: Get credential using SimpleWebAuthn
                 console.log('Attempting to get WebAuthn credential...');
@@ -581,7 +581,7 @@
                     authToken = result.token;
                     currentUser = result.user;
                     showAuthenticatedUI();
-                    showSuccess('auth-success', 'Login successful!');
+                    showSuccess('auth-success', `Welcome back, ${result.user.username}!`);
                     await loadTodos();
                 } else {
                     throw new Error('Authentication was not verified');
