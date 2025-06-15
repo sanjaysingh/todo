@@ -530,6 +530,17 @@
 
                 const options = await beginResponse.json();
                 console.log('Authentication options received:', options);
+                console.log('AllowCredentials details:', options.allowCredentials);
+                if (options.allowCredentials && options.allowCredentials.length > 0) {
+                    options.allowCredentials.forEach((cred, index) => {
+                        console.log(`Credential ${index}:`, {
+                            id: cred.id,
+                            idLength: cred.id ? cred.id.length : 0,
+                            type: cred.type,
+                            transports: cred.transports
+                        });
+                    });
+                }
 
                 // Step 2: Get credential using SimpleWebAuthn
                 console.log('Attempting to get WebAuthn credential...');
