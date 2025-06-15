@@ -31,6 +31,25 @@
             overflow: hidden;
         }
 
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 1rem !important;
+            }
+            
+            .header {
+                padding: 1.5rem !important;
+            }
+            
+            .header h1 {
+                font-size: 2rem !important;
+            }
+        }
+
         .header {
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             color: white;
@@ -69,11 +88,77 @@
             margin-bottom: 1.5rem;
         }
 
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .icon-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(108, 92, 231, 0.3);
+        }
+
+        .icon-btn.logout {
+            background: #dc3545;
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .icon-btn.logout:hover {
+            box-shadow: 0 8px 16px rgba(220, 53, 69, 0.3);
+        }
+
+        .divider {
+            margin: 1.5rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #dee2e6;
+        }
+
+        .divider span {
+            background: #f8f9fa;
+            padding: 0 1rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
         label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
             color: #555;
+            text-align: left;
         }
 
         input[type="text"] {
@@ -101,6 +186,22 @@
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin: 0.5rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .btn {
+                margin: 0.25rem 0;
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+            }
+            
+            .icon-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
         }
 
         .btn:hover {
@@ -132,6 +233,19 @@
             padding: 1rem;
             margin-bottom: 2rem;
             border-radius: 0 10px 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
         }
 
         .todo-section {
@@ -290,22 +404,17 @@
             <!-- Authentication Section -->
             <div id="auth-section" class="auth-section">
                 <div class="auth-form">
-                    <h2>Welcome! Please authenticate to continue</h2>
                     <div class="form-group">
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" placeholder="Enter username (required for registration)" required>
-                        <small style="color: #6c757d; margin-top: 0.5rem; display: block;">
-                            For registration: Enter a username<br>
-                            For login: Leave blank for usernameless authentication
-                        </small>
+                        <div class="input-group">
+                            <input type="text" id="username" placeholder="Enter username for registration" required>
+                            <button id="register-btn" class="icon-btn" title="Register with Passkey">+</button>
+                        </div>
+                    </div>
+                    <div class="divider">
+                        <span>or</span>
                     </div>
                     <div>
-                        <button id="register-btn" class="btn">Register with Passkey</button>
-                        <button id="login-btn" class="btn btn-secondary">Login with Passkey</button>
-                    </div>
-                    <div style="margin-top: 1rem; padding: 1rem; background: #e8f4f8; border-radius: 10px; border-left: 4px solid #17a2b8;">
-                        <strong>🔐 Passkey Authentication</strong><br>
-                        <small>Click "Login with Passkey" to see all your saved passkeys for this site. No username needed!</small>
+                        <button id="login-btn" class="btn">🔐 Login with Passkey</button>
                     </div>
                 </div>
                 <div id="auth-error" class="error hidden"></div>
@@ -316,7 +425,7 @@
             <div id="user-section" class="hidden">
                 <div class="user-info">
                     <strong>Welcome back, <span id="user-name"></span>!</strong>
-                    <button id="logout-btn" class="btn btn-danger" style="float: right;">Logout</button>
+                    <button id="logout-btn" class="icon-btn logout" title="Logout">↗</button>
                 </div>
 
                 <!-- Todo Stats -->
@@ -404,7 +513,11 @@
         function setLoading(button, loading) {
             if (loading) {
                 button.disabled = true;
-                button.innerHTML = '<span class="loading"></span> Processing...';
+                if (button.classList.contains('icon-btn')) {
+                    button.innerHTML = '<span class="loading"></span>';
+                } else {
+                    button.innerHTML = '<span class="loading"></span> Processing...';
+                }
             } else {
                 button.disabled = false;
                 button.innerHTML = button.dataset.originalText || button.textContent;
@@ -415,16 +528,15 @@
         async function register() {
             const username = usernameInput.value.trim();
             if (!username) {
-                showError('auth-error', 'Please enter a username');
+                showError('auth-error', 'Please enter a username to register');
                 return;
             }
 
-            registerBtn.dataset.originalText = registerBtn.textContent;
+            registerBtn.dataset.originalText = registerBtn.innerHTML;
             setLoading(registerBtn, true);
 
             try {
                 // Step 1: Begin registration
-                console.log('Starting registration for username:', username);
                 const beginResponse = await fetch(`${AUTH_SERVICE_URL}/auth/register/begin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -437,18 +549,12 @@
                 }
 
                 const options = await beginResponse.json();
-                console.log('Registration options received:', options);
 
                 // Step 2: Create credential using SimpleWebAuthn
-                console.log('Attempting to create WebAuthn credential...');
                 const credential = await SimpleWebAuthnBrowser.startRegistration({ optionsJSON: options });
-                console.log('WebAuthn credential created successfully:', credential);
-                console.log('Credential ID type:', typeof credential.id);
-                console.log('Credential ID value:', credential.id);
                 
                 // Ensure credential.id is a string (base64url format)
                 if (credential.id && typeof credential.id !== 'string') {
-                    console.warn('Converting credential.id from', typeof credential.id, 'to string');
                     // If it's an ArrayBuffer, convert it to base64url
                     if (credential.id instanceof ArrayBuffer) {
                         const bytes = new Uint8Array(credential.id);
@@ -460,7 +566,6 @@
                 }
 
                 // Step 3: Complete registration
-                console.log('Sending credential to server for verification...');
                 const completeResponse = await fetch(`${AUTH_SERVICE_URL}/auth/register/complete`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -485,25 +590,23 @@
                 }
 
             } catch (error) {
-                console.error('Registration error details:', error);
-                console.error('Error name:', error.name);
-                console.error('Error message:', error.message);
+                console.error('Registration error:', error);
                 
                 let errorMessage = error.message;
                 
                 // Provide specific error messages for common WebAuthn errors
                 if (error.name === 'NotAllowedError') {
-                    errorMessage = '❌ Passkey creation was cancelled or timed out. Please try again and complete the authentication prompt.';
+                    errorMessage = '❌ Passkey creation cancelled';
                 } else if (error.name === 'SecurityError') {
-                    errorMessage = '🔒 Security error: This might be due to an insecure connection or domain mismatch.';
+                    errorMessage = '🔒 Security error';
                 } else if (error.name === 'NotSupportedError') {
-                    errorMessage = '❓ Your browser or device doesn\'t support the required authentication method.';
+                    errorMessage = '❓ Passkeys not supported';
                 } else if (error.name === 'InvalidStateError') {
-                    errorMessage = '⚠️ This passkey already exists. Try logging in instead.';
+                    errorMessage = '⚠️ Passkey exists. Try login';
                 } else if (error.name === 'ConstraintError') {
-                    errorMessage = '🚫 Your device doesn\'t meet the authentication requirements.';
+                    errorMessage = '🚫 Device not compatible';
                 } else if (error.name === 'AbortError') {
-                    errorMessage = '⏹️ Operation was cancelled.';
+                    errorMessage = '⏹️ Operation cancelled';
                 }
                 
                 showError('auth-error', errorMessage);
@@ -513,17 +616,11 @@
         }
 
         async function login() {
-            const username = usernameInput.value.trim();
-            
-            // Username is now optional for usernameless authentication
-            console.log('Starting authentication for user:', username || 'usernameless');
-
-            loginBtn.dataset.originalText = loginBtn.textContent;
+            loginBtn.dataset.originalText = loginBtn.innerHTML;
             setLoading(loginBtn, true);
 
             try {
                 // Step 1: Begin authentication (usernameless)
-                console.log('Starting usernameless authentication...');
                 const beginResponse = await fetch(`${AUTH_SERVICE_URL}/auth/login/begin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -536,22 +633,12 @@
                 }
 
                 const options = await beginResponse.json();
-                console.log('Authentication options received:', options);
-                console.log('AllowCredentials details:', options.allowCredentials);
-                
-                // For usernameless auth, allowCredentials should be empty
-                console.log('Usernameless auth - allowCredentials length:', options.allowCredentials.length);
 
                 // Step 2: Get credential using SimpleWebAuthn
-                console.log('Attempting to get WebAuthn credential...');
                 const credential = await SimpleWebAuthnBrowser.startAuthentication({ optionsJSON: options });
-                console.log('WebAuthn credential received:', credential);
-                console.log('Credential ID type:', typeof credential.id);
-                console.log('Credential ID value:', credential.id);
                 
                 // Ensure credential.id is a string (base64url format)
                 if (credential.id && typeof credential.id !== 'string') {
-                    console.warn('Converting credential.id from', typeof credential.id, 'to string');
                     // If it's an ArrayBuffer, convert it to base64url
                     if (credential.id instanceof ArrayBuffer) {
                         const bytes = new Uint8Array(credential.id);
@@ -563,7 +650,6 @@
                 }
 
                 // Step 3: Complete authentication
-                console.log('Sending credential to server for verification...');
                 const completeResponse = await fetch(`${AUTH_SERVICE_URL}/auth/login/complete`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -588,25 +674,23 @@
                 }
 
             } catch (error) {
-                console.error('Login error details:', error);
-                console.error('Error name:', error.name);
-                console.error('Error message:', error.message);
+                console.error('Login error:', error);
                 
                 let errorMessage = error.message;
                 
                 // Provide specific error messages for common WebAuthn errors
                 if (error.name === 'NotAllowedError') {
-                    errorMessage = '❌ Authentication was cancelled or timed out. Please try again and complete the authentication prompt.';
+                    errorMessage = '❌ Login cancelled';
                 } else if (error.name === 'SecurityError') {
-                    errorMessage = '🔒 Security error: This might be due to an insecure connection or domain mismatch.';
+                    errorMessage = '🔒 Security error';
                 } else if (error.name === 'NotSupportedError') {
-                    errorMessage = '❓ Your browser or device doesn\'t support the required authentication method.';
+                    errorMessage = '❓ Passkeys not supported';
                 } else if (error.name === 'InvalidStateError') {
-                    errorMessage = '⚠️ No valid credentials found. Please register first.';
+                    errorMessage = '⚠️ No passkeys found. Register first';
                 } else if (error.name === 'ConstraintError') {
-                    errorMessage = '🚫 Your device doesn\'t meet the authentication requirements.';
+                    errorMessage = '🚫 Device not compatible';
                 } else if (error.name === 'AbortError') {
-                    errorMessage = '⏹️ Operation was cancelled.';
+                    errorMessage = '⏹️ Operation cancelled';
                 }
                 
                 showError('auth-error', errorMessage);
