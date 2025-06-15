@@ -1,0 +1,16 @@
+{
+  "name": "todo-service",
+  "version": "1.0.0",
+  "description": "Todo microservice using passkey authentication",
+  "main": "src/index.js",
+  "scripts": {
+    "setup": "bash setup.sh",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "jose": "^5.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.20.0"
+  }
+}
