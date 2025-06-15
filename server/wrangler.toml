@@ -14,3 +14,6 @@ AUTH_SERVICE_URL = "https://authservice.sanjaysingh.net"
 [[kv_namespaces]]
 binding = "TODO_KV"
 id = "411d1258d98a48f2928d51f2dc3657ee"
+
+[observability]
+enabled = true
