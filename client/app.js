@@ -223,8 +223,6 @@ async function toggleTodo(todoId) {
 }
 
 async function deleteTodo(todoId) {
-    if (!confirm('Are you sure you want to delete this todo?')) return;
-
     try {
         const response = await makeAuthenticatedRequest(`${TODO_SERVICE_URL}/todos/${todoId}`, {
             method: 'DELETE'
